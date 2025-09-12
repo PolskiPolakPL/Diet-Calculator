@@ -1,7 +1,8 @@
--;Monday;Tuesday;Wednesday;Thursday;Friday;Saturday;Sunday;carbohydrates(50%);proteins(20%);fat(30%)
-Breakfast (550-700kcal);;;;;;;;275-350kcal;110-140kcal;165-210kcal
-Morning Snack (220-280kcal);;;;;;;;110-140kcal;44-56kcal;66-84kcal
-Lunch (770-980kcal);;;;;;;;385-490kcal;154-196kcal;231-294kcal
-Evening Snack (220-280kcal);;;;;;;;110-140kcal;44-56kcal;66-84kcal
-Dinner (440-560kcal);;;;;;;;220-280kcal;88-112kcal;132-168kcal
-sum:
+Meal;Monday;Tuesday;Wednesday;Thursday;Friday;Saturday;Sunday;
+Breakfast(783kcal);
+Lunch(1044kcal);
+dinner(783kcal);
+sum:;
+carbs(50%):;
+fats(30%):;
+proteins(20%):;

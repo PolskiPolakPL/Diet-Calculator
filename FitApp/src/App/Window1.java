@@ -54,7 +54,7 @@ public class Window1 {
         //okno
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setSize(500,300);
-        frame.setResizable(false);
+        frame.setResizable(true);
         frame.setLocationRelativeTo(null);
 
         //Center Panel
@@ -101,20 +101,15 @@ public class Window1 {
         });
 
         printButton.addActionListener(e->{
-            ArrayList<Integer> ppmMealsList = GetCalculatedMeals((int)user.GetPassiveEnergyIntake());
-            ArrayList<Integer> cpmMealsList = GetCalculatedMeals((int)user.GetTotalEnergyIntake());
+            int carbs = carbSlider.getValue();
+            int fats = fatSlider.getValue();
+            int proteins = proteinSlider.getValue();
+            int currentPEI = (int)user.GetPassiveEnergyIntake();
+            int targetTEI = (int)user.GetTotalEnergyIntake();
+            int targetKcal = Math.max(currentPEI,targetTEI);
+            ArrayList<Meal> meals = GetMeals(targetKcal);
 
-            int[][] ppmMealsXNutrition = new int[ppmMealsList.size()][3];
-            int[][] cpmMealsXNutrition = new int[cpmMealsList.size()][3];
-
-            for(int i=0;i<ppmMealsList.size();i++){
-                ppmMealsXNutrition[i] = calculateNutrition(ppmMealsList.get(i),"ppm "+i);
-            }
-            for(int i=0;i<cpmMealsList.size();i++){
-                cpmMealsXNutrition[i] = calculateNutrition(cpmMealsList.get(i),"cpm "+i);
-            }
-
-            Pliki.zapiszPlik("CsvFiles\\","EmptyDietPlan.csv",generateCSV(ppmMealsXNutrition,cpmMealsXNutrition));
+            Pliki.zapiszPlik("CsvFiles\\","EmptyDietPlan.csv", GenerateCSV(meals, carbs, fats, proteins));
         });
 
         carbSlider.addChangeListener(e->{
@@ -123,12 +118,14 @@ public class Window1 {
                 correctSliders(loadSliderList(proteinSlider,fatSlider));
             }
         });
+
         proteinSlider.addChangeListener(e->{
             proteinSliderValue.setText(proteinSlider.getValue()+"%");
             if(check100percent()!=0){
                 correctSliders(loadSliderList(fatSlider,carbSlider));
             }
         });
+
         fatSlider.addChangeListener(e->{
             fatSliderValue.setText(fatSlider.getValue()+"%");
             if(check100percent()!=0){
@@ -163,8 +160,8 @@ public class Window1 {
     private void PrintOutput(){
         bmiLabel.setText("BMI: "+user.GetBMI());
         bmiLabel.setForeground(setBMIcolor(user.GetBMI()));
-        peiLabel.setText("PPM: "+ user.GetPassiveEnergyIntake() +"kcal");
-        teiLabel.setText("CPM: "+ user.GetTotalEnergyIntake() +"kcal");
+        peiLabel.setText("PPM: "+ (int)user.GetPassiveEnergyIntake() +"kcal");
+        teiLabel.setText("CPM: "+ (int)user.GetTotalEnergyIntake() +"kcal");
     }
 
     private Color setBMIcolor(double bmi){
@@ -181,35 +178,32 @@ public class Window1 {
         else
             return new Color(255, 0, 0);
     }
-    private int[] calculateNutrition(int totalKcal, String type){
-        int carbs, fat, proteins;
-        carbs = carbSlider.getValue();
-        fat = fatSlider.getValue();
-        proteins = proteinSlider.getValue();
-        System.out.println("--- "+type+" ---");
-        System.out.println("Carbohydrates: "+ GetPercentOfValue(totalKcal,carbs)+"kcal ("+carbs+"%)");
-        System.out.println("          Fat: "+ GetPercentOfValue(totalKcal,fat)+"kcal ("+fat+"%)");
-        System.out.println("     Proteins: "+ GetPercentOfValue(totalKcal,proteins)+"kcal ("+proteins+"%)");
-        return new int[]{GetPercentOfValue(totalKcal,carbs), GetPercentOfValue(totalKcal,proteins), GetPercentOfValue(totalKcal,fat)};
-    }
-    private ArrayList<Integer> GetCalculatedMeals(int totalKcal){
-        ArrayList<Integer> meals = new ArrayList<>();
+
+    private ArrayList<Meal> GetMeals(int targetKcal){
+        Meal breakfast, lunch, dinner;
+        ArrayList<Meal> meals = new ArrayList<>();
         if(snack1Checkbox.isSelected()){
-            meals.add(GetPercentOfValue(totalKcal,25));//breakfast
-            meals.add(GetPercentOfValue(totalKcal,10));//morningSnack
-            meals.add(GetPercentOfValue(totalKcal,35));//lunch
+            breakfast = new Meal("Breakfast",Utils.GetPercentOfValue(targetKcal,25));
+            Meal snack = new Meal("Morning Snack",Utils.GetPercentOfValue(targetKcal,10));
+            lunch = new Meal("Lunch",Utils.GetPercentOfValue(targetKcal,35));
+            meals.add(breakfast);
+            meals.add(snack);
         }
-        else{
-            meals.add(GetPercentOfValue(totalKcal,30));//breakfast
-            meals.add(GetPercentOfValue(totalKcal,40));//lunch
+        else {
+            breakfast = new Meal("Breakfast",Utils.GetPercentOfValue(targetKcal,30));
+            lunch = new Meal("Lunch",Utils.GetPercentOfValue(targetKcal,40));
+            meals.add(breakfast);
         }
+        meals.add(lunch);
         if(snack2Checkbox.isSelected()){
-            meals.add(GetPercentOfValue(totalKcal,10));//eveningSnack
-            meals.add(GetPercentOfValue(totalKcal,20));//dinner
+            Meal snack = new Meal("Morning Snack",Utils.GetPercentOfValue(targetKcal,10));
+            dinner = new Meal("dinner",Utils.GetPercentOfValue(targetKcal,20));
+            meals.add(snack);
         }
         else{
-            meals.add(GetPercentOfValue(totalKcal,30));//dinner
+            dinner = new Meal("dinner",Utils.GetPercentOfValue(targetKcal,30));
         }
+        meals.add(dinner);
         return meals;
     }
     //files
@@ -225,6 +219,7 @@ public class Window1 {
                 });
             }
     }
+
     private String[] switchLanguage(String fileName){
         ArrayList<String> languageList =  Pliki.wczytajPlik("Language" +"\\",fileName);
         sexLabel.setText(languageList.get(0));
@@ -241,39 +236,20 @@ public class Window1 {
         printButton.setText(languageList.get(22));
         return languageList.toArray(new String[0]);
     }
-    private String[] generateCSV(int[][]ppmValues, int[][] cpmValues){
+
+    private String[] GenerateCSV(ArrayList<Meal> meals,int carbs,int fats,int proteins){
         ArrayList<String> csvLinesList = new ArrayList();
-        ArrayList<Integer> ppmMealsSum = sumMealsValue(ppmValues);
-        ArrayList<Integer> cpmMealsSum = sumMealsValue(cpmValues);
-        ArrayList<String> mealNameList = new ArrayList<>();
-        mealNameList.add("Breakfast");
-        if(snack1Checkbox.isSelected())
-            mealNameList.add("Morning Snack");
-        mealNameList.add("Lunch");
-        if(snack2Checkbox.isSelected())
-            mealNameList.add("Evening Snack");
-        mealNameList.add("Dinner");
-
-
-        csvLinesList.add("-;Monday;Tuesday;Wednesday;Thursday;Friday;Saturday;Sunday;carbohydrates("+carbSlider.getValue()+"%);proteins("+proteinSlider.getValue()+"%);fat("+fatSlider.getValue()+"%)");
-        for (int i=0;i<mealNameList.size();i++) {
-            csvLinesList.add(mealNameList.get(i)+" ("+ppmMealsSum.get(i)+"-"+cpmMealsSum.get(i)+"kcal);;;;;;;;"+ppmValues[i][0]+"-"+cpmValues[i][0]+"kcal;"+ppmValues[i][1]+"-"+cpmValues[i][1]+"kcal;"+ppmValues[i][2]+"-"+cpmValues[i][2]+"kcal");
+        csvLinesList.add("Meal;Monday;Tuesday;Wednesday;Thursday;Friday;Saturday;Sunday;");
+        for (Meal meal:meals) {
+            csvLinesList.add((meal.name)+"("+meal.kcal+"kcal);");
         }
-        csvLinesList.add("sum:");
-
+        csvLinesList.add("sum:;");
+        csvLinesList.add("carbs("+carbs+"%):;");
+        csvLinesList.add("fats("+fats+"%):;");
+        csvLinesList.add("proteins("+proteins+"%):;");
         return csvLinesList.toArray(new String[0]);
     }
-    private ArrayList<Integer> sumMealsValue(int[][] mealsXnutrition){
-        ArrayList<Integer> mealsSum = new ArrayList<>();
-        for (int[] meals : mealsXnutrition) {
-            int sum = 0;
-            for (int nutrition : meals) {
-                sum += nutrition;
-            }
-            mealsSum.add(sum);
-        }
-        return mealsSum;
-    }
+
     //sliders
     private ArrayList<JSlider> loadSliderList(JSlider slider1, JSlider slider2){
         ArrayList sliderList = new ArrayList();
@@ -281,12 +257,14 @@ public class Window1 {
         sliderList.add(slider2);
         return sliderList;
     }
+
     private int check100percent(){
         int carbs = carbSlider.getValue();
         int fat = fatSlider.getValue();
         int protein = proteinSlider.getValue();
         return Integer.compare(carbs + fat + protein, 100);
     }
+
     private void correctSliders(List<JSlider> sliderList){
         while(check100percent()>0){
             for (JSlider nextSlider:sliderList) {
@@ -337,6 +315,7 @@ public class Window1 {
         northPanel.add(heightTextField);
         northPanel.add(cmLabel);
     }
+
     private void handleGroupLayout(GroupLayout groupLayout){
         groupLayout.setHorizontalGroup(
                 groupLayout.createSequentialGroup()
@@ -384,9 +363,5 @@ public class Window1 {
                         .addComponent(printButton)
         );
         groupLayout.linkSize(SwingConstants.VERTICAL, activityChoice,activityLabel, calculateButton);
-    }
-
-    private int GetPercentOfValue(int value, int percent){
-        return value*percent/100;
     }
 }
