@@ -1,0 +1,30 @@
+Płeć:
+Mężczyzna
+Kobieta
+Wiek:
+Waga:
+Wysokość:
+Poziom Aktywności fizycznej:
+siedzący tryb życia
+niska aktywność fizyczna
+umiarkowana aktywność fizyczna
+aktywny tryb życia
+bardzo aktywny tryb życia
+osoba wyczynowo uprawiająca sport
+Węglowodany:
+Białko:
+Tłuszcze:
+Śniadanie
+II Śniadanie
+Obiad
+Podwieczorek
+Kolacja
+przelicz
+Drukuj Plan Diety
+Poniedziałek
+Wtorek
+Środa
+Czwartek
+Piątek
+Sobota
+Niedziela

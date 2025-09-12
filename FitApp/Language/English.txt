@@ -1,0 +1,30 @@
+sex:
+Male
+Female
+age:
+weight:
+height:
+Physical Activity Level:
+sedentary lifestyle
+light active lifestyle
+moderately active lifestyle
+active lifestyle
+vigorously active lifestyle
+professional sports person
+Carbohydrates:
+Proteins:
+Fats:
+Breakfast
+Morning Snacks
+Lunch
+Evening Snacks
+Dinner
+Calculate
+Print Diet Plan
+Monday
+Tuesday
+Wednesday
+Thursday
+Friday
+Saturday
+Sunday
